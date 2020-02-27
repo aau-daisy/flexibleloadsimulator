@@ -1,0 +1,208 @@
+# chosen profile (container, dev, prod, test) to be read from command line argument (defaults to container)
+profile: dev
+
+# secret key used for token based authentication
+jwt_secret_key: "PLEASE_LOAD_FROM_SYSTEM_ENVIRONMENT_VARIABLES"
+jwt_access_token_expires:
+  days: 0
+  hours: 1
+  minutes: 0
+
+container:
+  # flask server host to listen on
+  host: 127.0.0.1
+
+  # flask server port to listen on
+  port: 5000
+
+  # run in the APP in the debug mode
+  debug: false
+
+  # specify the log level of the application
+  log_level: INFO
+
+  # url for connecting to a data store using sqlalchemy
+  # format: 'mysql://username:password@host:port/db'
+  db_url: mysql://root:Daisy@949@127.0.0.1:3306/flsdb
+
+  # whether to create FMUs on disk or not
+  create_fmus: true
+
+dev:
+  # flask server host to listen on
+  host: 127.0.0.1
+
+  # flask server port to listen on
+  port: 5000
+
+  # run in the APP in the debug mode
+  debug: true
+
+  # specify the log level of the application
+  log_level: DEBUG
+
+  # url for connecting to a data store using sqlalchemy
+  # format: 'mysql://username:password@host:port/db'
+  db_url: mysql://root:Daisy@949@localhost:3306/flsdb
+
+  # whether to create FMUs on disk or not
+  create_fmus: false
+
+prod:
+  # flask server host to listen on
+  host: 127.0.0.1
+
+  # flask server port to listen on
+  port: 5000
+
+  # run in the APP in the debug mode
+  debug: false
+
+  # specify the log level of the application
+  log_level: INFO
+
+  # url for connecting to a data store using sqlalchemy
+  # format: 'mysql://username:password@host:port/db'
+  db_url: mysql://root:Daisy@949@localhost:3306/flsdb
+
+  # whether to create FMUs on disk or not
+  create_fmus: false
+
+test:
+  # flask server host to listen on
+  host: 127.0.0.1
+
+  # flask server port to listen on
+  port: 5000
+
+  # run in the APP in the debug mode
+  debug: true
+
+  # specify the log level of the application
+  log_level: DEBUG
+
+  # url for connecting to a data store using sqlalchemy
+  # format: 'mysql://username:password@host:port/db'
+  db_url: mysql://root:Daisy@949@localhost:3306/flsdb
+
+  # whether to create FMUs on disk or not
+  create_fmus: false
+
+user:
+  # maximum number of devices that can be simulated by a single user
+  max_devices: 10
+
+device:
+  # interval in seconds after which the consumption data for all active devices is stored
+  storage_interval: 60
+
+model:
+  # full path of the Modelica file containing device models
+  file_path: resources/appliance_models.mo
+
+  # path of the directory to hold FMUs created during initialization
+  fmu_dir: /tmp/simulator/fmu/
+
+  # path of the directory to hold simulation output files
+  output_dir: /tmp/simulator/output/
+
+  # modelica package name
+  package_name: ApplianceModels
+
+  available_models:
+    # appliances with two operating states (On/Off) only"
+  - name: OnOff
+    params:
+      p_on:
+        min: 0
+        max: 5000
+        default: 100
+
+    # appliances whose power consumption follows exponential decay curve
+  - name: ExponentialDecay
+    params:
+      p_peak:
+        min: 0
+        max: 5000
+        default: 100
+      p_active:
+        min: 0
+        max: 5000
+        default: 100
+      lambda:
+        min: -20
+        max: 20
+        default: 0
+
+    # appliances whose power consumption follows logarithmic growth curve
+  - name: LogarithmicGrowth
+    params:
+      p_base:
+        min: 0
+        max: 5000
+        default: 100
+      lambda:
+        min: -20
+        max: 20
+        default: 0
+
+    # heat pump like model
+  - name: SISOLinearSystem
+    params:
+      A:
+        min: -0.01
+        max: -0.01
+        default: -0.01
+      B:
+        min: 0.002
+        max: 0.002
+        default: 0.002
+      C:
+        min: 1
+        max: 1
+        default: 1
+      D:
+        min: 0
+        max: 0
+        default: 0
+
+  example_devices:
+  - device_name: Lamp
+    model_name: OnOff
+    params:
+      p_on: 40
+
+  - device_name: Toaster
+    model_name: ExponentialDecay
+    params:
+      p_peak: 1470
+      p_active: 1433
+      lambda: 0.02
+
+  - device_name: CoffeeMaker
+    model_name: ExponentialDecay
+    params:
+      p_peak: 990
+      p_active: 905
+      lambda: 0.045
+
+  - device_name: Refrigerator
+    model_name: ExponentialDecay
+    params:
+      p_peak: 650.5
+      p_active: 126.19
+      lambda: 0.27
+
+  - device_name: AirConditioner
+    model_name: LogarithmicGrowth
+    params:
+      p_base: 2120.46
+      lambda: 13.78
+
+  - device_name: HeatPump
+    model_name: SISOLinearSystem
+    params:
+      A: -0.01
+      B: 0.002
+      C: 1
+      D: 0
