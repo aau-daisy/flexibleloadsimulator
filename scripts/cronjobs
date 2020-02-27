@@ -1,0 +1,5 @@
+@reboot sleep 20 && /usr/bin/curl -X POST -H "Content-Type: application/json" "http://127.0.0.1:5000/api/v1.0/devices/restore_device_simulations" > /var/log/cron.log 2>&1
+0 * * * * /usr/bin/curl -X POST -H "Content-Type: application/json" "http://127.0.0.1:5000/api/v1.0/devices/restore_device_simulations" >> /var/log/cron.log 2>&1
+* * * * * echo "Hello from cron-service-container" >> /var/log/cron.log 2>&1
+# mandatory empty line
+    
