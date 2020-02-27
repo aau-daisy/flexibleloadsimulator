@@ -1,0 +1,26 @@
+version: '3.6'
+
+services:
+  fls-server:
+    container_name: fls-server-container
+    image: repo.treescale.com/muhaftab/fls-server:latest
+    network_mode: "host"
+    stdin_open: true
+    tty: true
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+    logging:
+      driver: loki
+      options:
+        loki-url: "http://localhost:3100/api/prom/push"
+#  cron-service:
+#    container_name: cron-service-container
+#    image: repo.treescale.com/muhaftab/cron-service:latest
+#    network_mode: "host"
+#    stdin_open: true
+#    tty: true
+#    restart: always
+#    depends_on:
+#      - fls-server

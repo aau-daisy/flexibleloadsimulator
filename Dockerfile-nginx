@@ -1,0 +1,57 @@
+# Use custom Oracal Java 8 as parent image because official java:8 is missing some classes
+FROM muhaftab/jmodelica:2.0
+LABEL vendor="GOFLEX"
+LABEL maintainer="muhaftab@cs.aau.dk"
+
+# ENV is available inside the container
+ENV PORT 5000
+ENV FLS_PROFILE  container
+
+# JModelica
+ENV JMODELICA_HOME /root/JModelica
+ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
+ENV IPOPT_HOME ${JMODELICA_HOME}/CoinIpoptBuild
+ENV SUNDIALS_HOME ${JMODELICA_HOME}/ThirdParty/Sundials
+ENV PYTHONPATH ${PYTHONPATH}:${JMODELICA_HOME}/Python
+ENV LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:${IPOPT_HOME}/lib:${SUNDIALS_HOME}/lib:${JMODELICA_HOME}/ThirdParty/CasADi/lib
+ENV SEPARATE_PROCESS_JVM=${JAVA_HOME}
+
+# change nginx listen port
+ENV LISTEN_PORT ${PORT}
+
+# allow nginx to server static/index.hmtl directly
+ENV STATIC_INDEX 1
+
+#RUN echo ${LD_LIBRARY_PATH}
+
+# Set the working directory to /app
+WORKDIR /app
+
+# Copy the required files into the container at /app
+ADD main.py /app/main.py
+ADD requirements.txt /app/requirements.txt
+ADD resources /app/resources
+ADD uwsgi.ini /app/uwsgi.ini
+ADD app /app/app
+ADD apidocs/build /app/static
+COPY scripts/nginx.sh scripts/supervisor.sh /
+RUN chmod +x /nginx.sh /supervisor.sh
+
+# Install packages
+RUN pip install -r requirements.txt
+
+# Create a mount point on the native host.
+VOLUME /tmp
+
+# Port available to the world outside this container
+EXPOSE ${PORT}
+
+# Start the application when the container launches
+#RUN echo "#!/bin/bash \n python main.py --host 0.0.0.0 --port ${PORT} --create-fmus" > ./entrypoint.sh
+#RUN chmod +x ./entrypoint.sh
+#ENTRYPOINT ["python", "main.py", "--host", "0.0.0.0", "--port", "echo ${port}", "--create-fmus"]
+#ENTRYPOINT ["./entrypoint.sh"]
+
+RUN echo "#!/bin/bash\nbash /nginx.sh\nbash /supervisor.sh" > /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
